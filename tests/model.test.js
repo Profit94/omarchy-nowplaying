@@ -1,0 +1,71 @@
+// Run with: node tests/model.test.js
+const fs = require("fs"), path = require("path"), vm = require("vm"), assert = require("assert")
+const m = {}
+vm.createContext(m)
+vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "MusicModel.js"), "utf8"), m)
+
+const p = (o) => Object.assign({ trackTitle: "Song", trackArtist: "", trackAlbum: "", metadata: {} }, o)
+const url = (u) => ({ metadata: { "xesam:url": u } })
+const check = (name, player, want) => assert.strictEqual(m.isMusic(player, []), want, name)
+
+check("spotify", p({ desktopEntry: "spotify", identity: "Spotify" }), true)
+check("cider", p({ identity: "Cider" }), true)
+check("spotify with no track", p({ desktopEntry: "spotify", trackTitle: "" }), false)
+check("playerctld proxy", p({ dbusName: "org.mpris.MediaPlayer2.playerctld", trackAlbum: "A", trackArtist: "B" }), false)
+
+const vivaldi = { desktopEntry: "vivaldi-stable", identity: "Vivaldi" }
+check("apple music web", p({ ...vivaldi, ...url("https://music.apple.com/in/album/x") }), true)
+check("youtube music web", p({ ...vivaldi, ...url("https://music.youtube.com/watch?v=1") }), true)
+check("youtube video by url", p({ ...vivaldi, trackArtist: "Channel", trackAlbum: "x", ...url("https://www.youtube.com/watch?v=1") }), false)
+check("lookalike host", p({ ...vivaldi, ...url("https://music.apple.com.evil.example/x") }), false)
+check("browser music, no url", p({ ...vivaldi, trackArtist: "Artist", trackAlbum: "Album" }), true)
+check("browser video, no url", p({ ...vivaldi, trackArtist: "Channel" }), false)
+
+const mpv = { identity: "mpv", desktopEntry: "mpv" }
+check("mpv with a flac", p({ ...mpv, ...url("file:///home/user/Music/a%20b.flac") }), true)
+check("mpv with a film", p({ ...mpv, trackArtist: "A", trackAlbum: "B", ...url("file:///home/user/film.mkv") }), false)
+check("unknown app, no evidence", p({ identity: "Thing" }), false)
+assert.strictEqual(m.isMusic(p({ identity: "Thing" }), m.parseExtraPlayers(" thing , other")), true, "extra player")
+
+check("name inside a longer word", p({ identity: "Skew Viewer" }), false)
+check("short app name on its own", p({ identity: "kew" }), true)
+check("name in a reverse-DNS id", p({ desktopEntry: "io.bassi.Amberol" }), true)
+assert.strictEqual(m.isMusic(p({ identity: "Foo (bar)" }), ["foo (bar)"]), true, "extra name with regex characters")
+
+const a = p({ dbusName: "a", isPlaying: false }), b = p({ dbusName: "b", isPlaying: true }), c = p({ dbusName: "c", isPlaying: true })
+assert.strictEqual(m.selectActive([a, b], ""), b, "playing wins")
+assert.strictEqual(m.selectActive([a, b], "a"), b, "playing beats paused preference")
+assert.strictEqual(m.selectActive([b, c], "c"), c, "preference wins between playing")
+assert.strictEqual(m.selectActive([a], "gone"), a, "falls back")
+assert.strictEqual(m.selectActive([], ""), null, "empty")
+assert.strictEqual(m.selectActive([a, b], "", "a"), a, "a pinned paused player beats a playing one")
+assert.strictEqual(m.selectActive([b], "", "gone"), b, "a pinned player that left is ignored")
+
+assert.strictEqual(m.safeArtUrl("javascript:alert(1)"), "", "art scheme")
+assert.strictEqual(m.safeArtUrl("https://i.scdn.co/a"), "https://i.scdn.co/a", "art https")
+assert.strictEqual(m.formatTime(65), "1:05")
+assert.strictEqual(m.formatTime(3725), "1:02:05")
+assert.strictEqual(m.formatTime(NaN), "--:--")
+assert.strictEqual(m.barLevel(0.5, 0.5), 1, "at the ceiling")
+assert.strictEqual(m.barLevel(0.25, 0.5), 0.125, "swings are curved")
+assert.strictEqual(m.barLevel(0, m.nextCeiling(0, 0)), 0, "silence")
+assert.ok(m.barLevel(0.001, m.nextCeiling(0.001, 0)) < 0.001, "noise stays low")
+assert.strictEqual(m.nextCeiling(0.8, 0.2), 0.8, "ceiling rises at once")
+assert.ok(m.nextCeiling(0.1, 0.8) > 0.79, "ceiling falls slowly")
+const nums = (path) => path.trim().split(/\s+/).map((part) => parseFloat(part.replace(/[ML]/, "")))
+const ys = (path) => nums(path).filter((_, i) => i % 2 === 1)
+for (let phase = 0; phase < 6.3; phase += 0.1) {
+  const y = ys(m.wavePath(16, 1, phase))
+  assert.ok(Math.min(...y) >= 2 && Math.max(...y) <= 14, "wave stays in its box at phase " + phase)
+  assert.strictEqual(y[0], 8, "wave starts on the centre line")
+  assert.strictEqual(y[y.length - 1], 8, "wave ends on the centre line")
+}
+assert.ok(ys(m.wavePath(16, 0, 1.2)).every((y) => y === 8), "paused wave is flat")
+assert.notStrictEqual(m.wavePath(16, 1, 0), m.wavePath(16, 1, 1), "phase moves the wave")
+assert.ok(m.advancePhase(6.2, 100) < 2 * Math.PI, "phase wraps")
+assert.strictEqual(m.advancePhase(1, 60000), m.advancePhase(1, 250), "a long gap does not jump")
+assert.strictEqual(m.isRemoteArt("https://i.scdn.co/a"), true, "https art is remote")
+assert.strictEqual(m.isRemoteArt("file:///a.png"), false, "file art is local")
+assert.notStrictEqual(m.artFileName("https://a/1"), m.artFileName("https://a/2"), "different covers, different files")
+assert.ok(/^cover-[0-9a-f]+\.img$/.test(m.artFileName("https://a/../../etc/passwd")), "nothing from the URL reaches the path")
+console.log("ok")

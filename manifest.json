@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "softwave.nowplaying",
+  "name": "Now Playing",
+  "version": "1.0.0",
+  "author": "Profit94",
+  "license": "MIT",
+  "description": "A music-only now-playing control in the bar: Spotify, Apple Music, web players and local files. Videos stay out of it.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "Now Playing",
+    "description": "Appears while music is loaded, with artwork, scrubbing and transport controls.",
+    "category": "Media",
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "showWhenPaused": true,
+      "extraPlayers": ""
+    },
+    "schema": [
+      {
+        "key": "showWhenPaused",
+        "type": "boolean",
+        "label": "Keep the icon while music is paused",
+        "defaultValue": true
+      },
+      {
+        "key": "extraPlayers",
+        "type": "string",
+        "label": "Extra players to treat as music",
+        "description": "Comma-separated names, for a player the filter leaves out.",
+        "defaultValue": ""
+      }
+    ]
+  }
+}
