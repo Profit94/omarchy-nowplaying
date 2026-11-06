@@ -21,6 +21,14 @@ omarchy bar move softwave.nowplaying --before omarchy.bluetooth
 
 Plugins run unsandboxed inside the Omarchy shell, so review the code before installing it.
 
+## Update
+
+```bash
+omarchy plugin update softwave.nowplaying
+```
+
+If the bar icon doesn't change after updating, run `omarchy restart shell`. The current version is [v1.0.1](https://github.com/Profit94/omarchy-nowplaying/releases/tag/v1.0.1).
+
 ## Controls
 
 | Input | Action |
@@ -58,6 +66,17 @@ Set these with `omarchy bar set softwave.nowplaying <key> <value>`.
 
 - The CPU spikes aren't fully explained. They appear across the shell's main, render and Wayland threads, and moving the pointer along the bar raises the shell's CPU use even with no music playing, so the shell's own activity is at least part of it.
 - On one tested setup, Spotify's GPU helper crashed under XWayland. Adding `--ozone-platform=wayland` to `~/.config/spotify-flags.conf` stopped it there.
+
+## Changelog
+
+### [v1.0.1](https://github.com/Profit94/omarchy-nowplaying/releases/tag/v1.0.1)
+
+- The bar's sound wave now draws at the same size as the icons beside it. It was about 15% too small.
+- Bar screenshots retaken to show the corrected size.
+
+### v1.0.0
+
+- First release.
 
 ## Tests
 
