@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "softwave.nowplaying",
   "name": "Now Playing",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Profit94",
   "license": "MIT",
   "description": "A music-only now-playing control in the bar: Spotify, Apple Music, web players and local files. Videos stay out of it.",
