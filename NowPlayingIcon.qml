@@ -26,9 +26,12 @@ Item {
   }
 
   // The bar sizes an icon from what it paints. This fixed box keeps that
-  // constant, or the icon would rescale as the wave changes height.
+  // constant, or the icon would rescale as the wave changes height. It covers
+  // exactly the most ink the wave can draw (its span plus the round caps), so
+  // the wave fills the bar's icon size like the glyphs next to it.
   Rectangle {
     anchors.fill: parent
+    anchors.margins: root.iconSize / 16
     color: "transparent"
   }
 
