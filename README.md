@@ -21,6 +21,14 @@ omarchy bar move softwave.nowplaying --before omarchy.bluetooth
 
 Plugins run unsandboxed inside the Omarchy shell, so review the code before installing it.
 
+## Remove
+
+```bash
+omarchy plugin remove softwave.nowplaying
+```
+
+This removes the plugin and its bar placement. Your other Omarchy settings are left untouched.
+
 ## Update
 
 ```bash
@@ -83,3 +91,7 @@ Set these with `omarchy bar set softwave.nowplaying <key> <value>`.
 ```bash
 node tests/model.test.js
 ```
+
+## License
+
+Copyright (c) 2026 Profit94. All rights reserved. You may install and use this plugin, and send fixes back through pull requests. Copying, redistributing, reusing its code or assets, or imitating its visual style is not permitted without written permission. See [LICENSE](LICENSE).

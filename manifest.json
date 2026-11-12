@@ -4,7 +4,7 @@
   "name": "Now Playing",
   "version": "1.0.1",
   "author": "Profit94",
-  "license": "MIT",
+  "license": "LicenseRef-Proprietary",
   "description": "A music-only now-playing control in the bar: Spotify, Apple Music, web players and local files. Videos stay out of it.",
   "kinds": [
     "bar-widget"
