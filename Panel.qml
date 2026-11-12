@@ -621,49 +621,57 @@ Panel {
           }
         }
 
-        // Transport.
-        Row {
-          anchors.horizontalCenter: parent.horizontalCenter
-          spacing: Style.space(10)
+        // Transport. The buttons' hover boxes reach a little into the card's
+        // bottom padding, so the icons don't sit on a band of empty space
+        // that is only there for the hover box.
+        Item {
+          width: parent.width
+          height: Math.max(0, transport.height - Style.space(6))
 
-          Button {
-            anchors.verticalCenter: parent.verticalCenter
-            iconText: String.fromCodePoint(0xF04AE)
-            foreground: root.foreground
-            fontFamily: root.fontFamily
-            iconSize: Style.font.icon
-            verticalPadding: Style.space(3)
-            tooltipText: strings.t("previous")
-            enabled: !!root.player && root.player.canGoPrevious
-            opacity: enabled ? 1 : 0.4
-            onClicked: root.skip(-1)
-          }
+          Row {
+            id: transport
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: Style.space(10)
 
-          Button {
-            anchors.verticalCenter: parent.verticalCenter
-            iconText: String.fromCodePoint(root.isPlaying ? 0xF03E4 : 0xF040A)
-            foreground: root.foreground
-            fontFamily: root.fontFamily
-            iconSize: Style.font.iconLarge
-            verticalPadding: Style.space(3)
-            horizontalPadding: Style.spacing.panelGap
-            tooltipText: strings.t("playPause")
-            enabled: MusicModel.canPlayPause(root.player)
-            opacity: enabled ? 1 : 0.4
-            onClicked: root.playPause()
-          }
+            Button {
+              anchors.verticalCenter: parent.verticalCenter
+              iconText: String.fromCodePoint(0xF04AE)
+              foreground: root.foreground
+              fontFamily: root.fontFamily
+              iconSize: Style.font.icon
+              verticalPadding: Style.space(3)
+              tooltipText: strings.t("previous")
+              enabled: !!root.player && root.player.canGoPrevious
+              opacity: enabled ? 1 : 0.4
+              onClicked: root.skip(-1)
+            }
 
-          Button {
-            anchors.verticalCenter: parent.verticalCenter
-            iconText: String.fromCodePoint(0xF04AD)
-            foreground: root.foreground
-            fontFamily: root.fontFamily
-            iconSize: Style.font.icon
-            verticalPadding: Style.space(3)
-            tooltipText: strings.t("next")
-            enabled: !!root.player && root.player.canGoNext
-            opacity: enabled ? 1 : 0.4
-            onClicked: root.skip(1)
+            Button {
+              anchors.verticalCenter: parent.verticalCenter
+              iconText: String.fromCodePoint(root.isPlaying ? 0xF03E4 : 0xF040A)
+              foreground: root.foreground
+              fontFamily: root.fontFamily
+              iconSize: Style.font.iconLarge
+              verticalPadding: Style.space(3)
+              horizontalPadding: Style.spacing.panelGap
+              tooltipText: strings.t("playPause")
+              enabled: MusicModel.canPlayPause(root.player)
+              opacity: enabled ? 1 : 0.4
+              onClicked: root.playPause()
+            }
+
+            Button {
+              anchors.verticalCenter: parent.verticalCenter
+              iconText: String.fromCodePoint(0xF04AD)
+              foreground: root.foreground
+              fontFamily: root.fontFamily
+              iconSize: Style.font.icon
+              verticalPadding: Style.space(3)
+              tooltipText: strings.t("next")
+              enabled: !!root.player && root.player.canGoNext
+              opacity: enabled ? 1 : 0.4
+              onClicked: root.skip(1)
+            }
           }
         }
 

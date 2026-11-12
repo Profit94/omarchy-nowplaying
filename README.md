@@ -35,7 +35,7 @@ This removes the plugin and its bar placement. Your other Omarchy settings are l
 omarchy plugin update softwave.nowplaying
 ```
 
-If the bar icon doesn't change after updating, run `omarchy restart shell`. The current version is [v1.0.1](https://github.com/Profit94/omarchy-nowplaying/releases/tag/v1.0.1).
+If the bar icon doesn't change after updating, run `omarchy restart shell`. The current version is [v1.0.2](https://github.com/Profit94/omarchy-nowplaying/releases/tag/v1.0.2).
 
 ## Controls
 
@@ -76,6 +76,10 @@ Set these with `omarchy bar set softwave.nowplaying <key> <value>`.
 - On one tested setup, Spotify's GPU helper crashed under XWayland. Adding `--ozone-platform=wayland` to `~/.config/spotify-flags.conf` stopped it there.
 
 ## Changelog
+
+### [v1.0.2](https://github.com/Profit94/omarchy-nowplaying/releases/tag/v1.0.2)
+
+- Tighter bottom spacing in the panel: the play, previous and next hover boxes now reach into the card's bottom padding, so the panel no longer ends on a band of empty space.
 
 ### [v1.0.1](https://github.com/Profit94/omarchy-nowplaying/releases/tag/v1.0.1)
 
