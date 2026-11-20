@@ -54,14 +54,38 @@ assert.strictEqual(m.nextCeiling(0.8, 0.2), 0.8, "ceiling rises at once")
 assert.ok(m.nextCeiling(0.1, 0.8) > 0.79, "ceiling falls slowly")
 const nums = (path) => path.trim().split(/\s+/).map((part) => parseFloat(part.replace(/[ML]/, "")))
 const ys = (path) => nums(path).filter((_, i) => i % 2 === 1)
-for (let phase = 0; phase < 6.3; phase += 0.1) {
-  const y = ys(m.wavePath(16, 1, phase))
-  assert.ok(Math.min(...y) >= 2 && Math.max(...y) <= 14, "wave stays in its box at phase " + phase)
-  assert.strictEqual(y[0], 8, "wave starts on the centre line")
-  assert.strictEqual(y[y.length - 1], 8, "wave ends on the centre line")
+const xs = (path) => nums(path).filter((_, i) => i % 2 === 0)
+const g15 = m.waveGrid(15)
+assert.deepStrictEqual([g15.stroke, g15.middle], [2, 8], "15 px box: 2 px stroke covering rows 7 and 8")
+for (const px of [12, 15, 18, 20, 24, 30, 36]) {
+  const g = m.waveGrid(px)
+  assert.ok(Number.isInteger(g.stroke), "whole-pixel stroke at " + px)
+  assert.ok(Number.isInteger(g.middle - g.stroke / 2), "paused line covers whole rows at " + px)
+  for (let phase = 0; phase < 6.3; phase += 0.1) {
+    const path = m.wavePath(g, 1, phase, 1), y = ys(path)
+    assert.ok(Math.min(...y) - g.stroke / 2 >= -1e-9 && Math.max(...y) + g.stroke / 2 <= g.size + 1e-9,
+      "wave ink stays in a " + px + " px box at phase " + phase)
+    assert.strictEqual(y[0], g.middle, "wave starts on the centre line")
+    assert.strictEqual(y[y.length - 1], g.middle, "wave ends on the centre line")
+    assert.ok(Math.min(...xs(path)) - g.stroke / 2 >= 0 && Math.max(...xs(path)) + g.stroke / 2 <= g.size, "caps stay in the box")
+  }
 }
-assert.ok(ys(m.wavePath(16, 0, 1.2)).every((y) => y === 8), "paused wave is flat")
-assert.notStrictEqual(m.wavePath(16, 1, 0), m.wavePath(16, 1, 1), "phase moves the wave")
+assert.ok(ys(m.wavePath(g15, 0, 1.2, 1)).every((y) => y === 8), "paused wave is flat")
+assert.notStrictEqual(m.wavePath(g15, 1, 0, 1), m.wavePath(g15, 1, 1, 1), "phase moves the wave")
+assert.ok(ys(m.wavePath(g15, 0, 0, 0.8)).every((y) => y === 6.4), "unit scales device pixels to item units")
+assert.ok(Math.abs(m.pixelSnap(10, 1.25) - 0.4) < 1e-9, "12.5 device px shifts half a pixel to 13")
+assert.strictEqual(m.pixelSnap(8, 1.25), 0, "already on the grid")
+assert.ok([3.3, 7.77, 101.1].every((p) => Number.isInteger(Math.round((p + m.pixelSnap(p, 1.25)) * 1.25 * 1e6) / 1e6)), "snapped points land on whole device pixels")
+assert.deepStrictEqual(Array.from(m.silentLevels(3)), [0, 0, 0], "silent ring")
+const ringPts = (p) => { const n = nums(p.replace("Z", "")); const out = []; for (let i = 0; i < n.length; i += 2) out.push(Math.hypot(n[i] - 24, n[i + 1] - 24)); return out }
+assert.ok(ringPts(m.ringPath(24, 24, 18, 0, 1, 6)).every((r) => Math.abs(r - 18) < 0.01), "quiet ring is a circle")
+for (let phase = 0; phase < 6.3; phase += 0.3) {
+  const rs = ringPts(m.ringPath(24, 24, 18, 4, phase, 9))
+  assert.ok(Math.max(...rs) <= 22.01 && Math.min(...rs) >= 13.99, "ring stays within its swing at phase " + phase)
+}
+assert.ok(m.ringPath(24, 24, 18, 3, 0, 6).trim().endsWith("Z"), "ring is closed")
+assert.notStrictEqual(m.ringPath(24, 24, 18, 3, 0, 6), m.ringPath(24, 24, 18, 3, 1, 6), "phase moves the ring")
+assert.strictEqual(m.ringPath(24, 24, 18, 3, 0, 6), m.ringPath(24, 24, 18, 3, 2 * Math.PI * 2, 6).replace(/-0\.00/g, "0.00"), "ring loops without a jump")
 assert.ok(m.advancePhase(6.2, 100) < 2 * Math.PI, "phase wraps")
 assert.strictEqual(m.advancePhase(1, 60000), m.advancePhase(1, 250), "a long gap does not jump")
 assert.strictEqual(m.isRemoteArt("https://i.scdn.co/a"), true, "https art is remote")

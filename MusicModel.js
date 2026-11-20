@@ -178,6 +178,12 @@ function nextCeiling(peak, ceiling) {
   return Math.max(clampFraction(peak), (ceiling || 0) * 0.99, 0.02)
 }
 
+function silentLevels(count) {
+  var levels = []
+  for (var i = 0; i < count; i++) levels.push(0)
+  return levels
+}
+
 function barLevel(peak, ceiling) {
   return Math.pow(clampFraction(peak / (ceiling || 1)), 3)
 }
@@ -191,24 +197,61 @@ function advancePhase(phase, elapsedMs) {
   return (phase + step * 2 * Math.PI) % (2 * Math.PI)
 }
 
-// The wave as an SVG path inside a size-by-size box. A second, faster ripple
-// keeps it from reading as a plain sine, and the envelope pins both ends to
-// the centre line. Peak height stays inside the box at every phase.
-function wavePath(size, amplitude, phase) {
-  var points = 16
-  var inset = size / 8
-  var width = size - inset * 2
-  var middle = size / 2
-  var reach = (size / 2 - inset) * clampFraction(amplitude)
+// The wave on the screen's device-pixel grid, so it is as sharp as the font
+// glyphs beside it. `devicePixels` is the icon box in device pixels. The stroke
+// is a whole number of pixels (2 at the bar's usual size) and the centre line
+// sits where that stroke covers whole rows, so the paused line has no fringe.
+function waveGrid(devicePixels) {
+  var size = Math.max(6, Math.round(devicePixels))
+  var stroke = Math.max(1, Math.round(size * 2 / 15))
+  var middle = stroke % 2 === 0 ? Math.round(size / 2) : Math.floor(size / 2) + 0.5
+  var reach = Math.min(middle, size - middle) - stroke / 2
+  return { size: size, stroke: stroke, middle: middle, reach: reach, inset: stroke / 2 }
+}
+
+// The wave wrapped into a closed ring as an SVG path, with the same two
+// ripples as the bar icon. `peaks` must be a whole number so the ends meet,
+// and `reach` is how far a ripple swings from `radius`.
+function ringPath(centerX, centerY, radius, reach, phase, peaks) {
+  var points = 112
+  var count = Math.max(1, Math.round(peaks || 7))
+  var path = ""
+  for (var i = 0; i < points; i++) {
+    var angle = 2 * Math.PI * i / points
+    var ripple = 0.85 * Math.sin(count * angle - phase)
+      + 0.15 * Math.sin(2 * count * angle - 2 * phase)
+    var r = radius + Math.max(0, reach) * ripple
+    path += (i === 0 ? "M" : "L") + (centerX + r * Math.cos(angle)).toFixed(2) + " "
+      + (centerY + r * Math.sin(angle)).toFixed(2) + " "
+  }
+  return path + "Z"
+}
+
+// The shift, in item units, that moves a point at `position` onto the nearest
+// whole device pixel.
+function pixelSnap(position, pixelRatio) {
+  var ratio = pixelRatio > 0 ? pixelRatio : 1
+  var device = position * ratio
+  return (Math.round(device) - device) / ratio
+}
+
+// The wave as an SVG path, in device pixels multiplied by `unit`. A second,
+// faster ripple keeps it from reading as a plain sine, and the envelope pins
+// both ends to the centre line. Peak height stays inside the box at every phase.
+function wavePath(grid, amplitude, phase, unit) {
+  var points = 24
+  var scale = unit || 1
+  var width = grid.size - grid.inset * 2
+  var reach = grid.reach * clampFraction(amplitude)
   var path = ""
   for (var i = 0; i <= points; i++) {
     var t = i / points
     var envelope = Math.sin(Math.PI * t)
     var wave = 0.85 * Math.sin(2 * Math.PI * 1.25 * t - phase)
       + 0.15 * Math.sin(2 * Math.PI * 2.5 * t - phase * 2)
-    var x = inset + width * t
-    var y = middle + reach * envelope * wave
-    path += (i === 0 ? "M" : "L") + x.toFixed(2) + " " + y.toFixed(2) + " "
+    var x = (grid.inset + width * t) * scale
+    var y = (grid.middle + reach * envelope * wave) * scale
+    path += (i === 0 ? "M" : "L") + x.toFixed(3) + " " + y.toFixed(3) + " "
   }
   return path
 }

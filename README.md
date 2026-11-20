@@ -4,9 +4,9 @@
   <img src="preview.png" alt="The Now Playing panel open under the Omarchy bar" width="489">
 </p>
 
-A minimal, music-only control for the Omarchy bar. A small sound wave moves while music plays and settles into a flat line when paused. The icon appears only while a music player has a track loaded.
+A minimal, music-only control for the Omarchy bar. A small sound wave moves while music plays and settles into a flat line when paused. It is drawn on whole pixels, so it stays as sharp as the icons beside it. The icon appears only while a music player has a track loaded.
 
-Click it for artwork with a soft glow in the cover's own colours, track details, a progress bar, and previous, play and next controls. It uses your Omarchy theme and system font.
+Click it for artwork with a soft glow in the cover's own colours, track details, two ring-shaped sound waves that ripple with the music, a progress bar, and previous, play and next controls. It uses your Omarchy theme and system font.
 
 | Playing | Paused |
 |---|---|
@@ -35,7 +35,7 @@ This removes the plugin and its bar placement. Your other Omarchy settings are l
 omarchy plugin update softwave.nowplaying
 ```
 
-If the bar icon doesn't change after updating, run `omarchy restart shell`. The current version is [v1.0.2](https://github.com/Profit94/omarchy-nowplaying/releases/tag/v1.0.2).
+If the bar icon doesn't change after updating, run `omarchy restart shell`. The current version is [v1.1.0](https://github.com/Profit94/omarchy-nowplaying/releases/tag/v1.1.0).
 
 ## Controls
 
@@ -67,7 +67,7 @@ Set these with `omarchy bar set softwave.nowplaying <key> <value>`.
 ## Privacy and performance
 
 - It reads player information over MPRIS. While the panel is open, `curl` downloads the cover from the address the player supplies, which is usually the music service. Covers are kept temporarily in `$XDG_RUNTIME_DIR/omarchy-nowplaying`.
-- The level bars read your audio output's level, only while the panel is open and music is playing. No audio is recorded or sent anywhere.
+- The wave rings read your audio output's level, only while the panel is open and music is playing. No audio is recorded or sent anywhere.
 - The moving icon typically uses about 3–4% of one CPU core while playing, with occasional spikes up to about 15%. It stops when paused and when animations are off with `omarchy toggle animations`.
 
 ## Known issues
@@ -76,6 +76,14 @@ Set these with `omarchy bar set softwave.nowplaying <key> <value>`.
 - On one tested setup, Spotify's GPU helper crashed under XWayland. Adding `--ozone-platform=wayland` to `~/.config/spotify-flags.conf` stopped it there.
 
 ## Changelog
+
+### [v1.1.0](https://github.com/Profit94/omarchy-nowplaying/releases/tag/v1.1.0)
+
+- The bar's sound wave is drawn on whole screen pixels, so it is as sharp as the icons beside it. Paused, it rests as a clean two-pixel line instead of a blur across three rows.
+- Two wave rings replace the five level bars in the panel. They ripple with the real output level and settle into a still circle when paused.
+- The glow behind the cover is a little stronger and more colourful.
+- The play, previous and next buttons now sit evenly between the timeline and the divider below.
+- Bar and panel screenshots still show the previous design.
 
 ### [v1.0.2](https://github.com/Profit94/omarchy-nowplaying/releases/tag/v1.0.2)
 

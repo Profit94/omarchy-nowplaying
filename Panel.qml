@@ -259,8 +259,10 @@ Panel {
   // Runs only while the panel is open and music is playing, so there is no
   // capture stream the rest of the time. It measures the output's real level.
   readonly property bool meterActive: opened && isPlaying && !Style.reduceMotion
+  // The ring shows the newest reading; a few are kept so a single spike
+  // doesn't vanish before the ring's swell has caught it.
   readonly property int barCount: 5
-  property var levels: [0, 0, 0, 0, 0]
+  property var levels: MusicModel.silentLevels(barCount)
   property real meterCeiling: 0
 
   PwNodePeakMonitor {
@@ -269,8 +271,8 @@ Panel {
     enabled: root.meterActive
   }
 
-  // The newest reading enters at the left and moves right, so the bars show
-  // the last moments of the real signal instead of an imitation spectrum.
+  // The newest reading comes first. It measures the real signal rather than
+  // imitating a spectrum.
   Timer {
     interval: 90
     repeat: true
@@ -284,7 +286,7 @@ Panel {
   }
   onMeterActiveChanged: {
     if (meterActive) return
-    levels = [0, 0, 0, 0, 0]
+    levels = MusicModel.silentLevels(barCount)
     meterCeiling = 0
   }
 
@@ -301,9 +303,11 @@ Panel {
         height: Style.bar.iconCanvas
         opacity: root.iconOpacity
 
+        // Drawn at the bar's visible icon size, so the bar shows it at a
+        // scale of one and its pixel grid survives.
         NowPlayingIcon {
-          anchors.fill: parent
-          iconSize: parent.width
+          anchors.centerIn: parent
+          iconSize: Style.bar.iconSize
           moving: root.isPlaying && root.iconShown && !Style.reduceMotion
           raised: root.isPlaying
           color: root.isPlaying ? root.barForeground : Qt.darker(root.barForeground, 1.55)
@@ -369,8 +373,9 @@ Panel {
             blurEnabled: true
             blur: 1
             blurMax: 26
-            saturation: 0.35
-            opacity: root.isPlaying ? 0.95 : 0.45
+            saturation: 0.45
+            brightness: 0.03
+            opacity: root.isPlaying ? 0.8 : 0.45
 
             Behavior on opacity {
               NumberAnimation { duration: Style.duration(280); easing.type: Easing.OutCubic }
@@ -448,36 +453,18 @@ Panel {
             }
           }
 
-          Row {
+          // Two of the bar's waves wrapped into rings, rippling with the real level.
+          // Centred on the cover; at full swing it reaches the timeline's
+          // right edge.
+          WaveRing {
             id: meter
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            height: Style.space(16)
-            spacing: Style.space(2)
-
-            Repeater {
-              model: root.barCount
-
-              Item {
-                required property int index
-                width: Style.space(2)
-                height: meter.height
-
-                Rectangle {
-                  anchors.bottom: parent.bottom
-                  width: parent.width
-                  height: Math.max(Style.space(2), parent.height * (root.levels[parent.index] || 0))
-                  color: root.isPlaying ? root.foreground : root.dim
-
-                  Behavior on height {
-                    NumberAnimation { duration: Style.duration(90); easing.type: Easing.OutCubic }
-                  }
-                  Behavior on color {
-                    ColorAnimation { duration: Style.duration(160) }
-                  }
-                }
-              }
-            }
+            level: Math.max(root.levels[0] || 0, root.levels[1] || 0)
+            playing: root.isPlaying
+            moving: root.opened && !Style.reduceMotion
+            color: root.foreground
+            dimColor: root.dim
           }
 
           Column {
@@ -631,6 +618,9 @@ Panel {
           Row {
             id: transport
             anchors.horizontalCenter: parent.horizontalCenter
+            // Centred between the time labels and whatever comes next. The
+            // hover boxes' top padding overlaps the gap above instead.
+            y: -Style.space(5)
             spacing: Style.space(10)
 
             Button {
