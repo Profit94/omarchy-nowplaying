@@ -41,7 +41,48 @@ Item {
     root.snapY = MusicModel.pixelSnap(scene.y, root.pixelRatio)
   }
 
-  Component.onCompleted: Qt.callLater(snapToPixels)
+  function scheduleSnap() { Qt.callLater(root.snapToPixels) }
+
+  // The icon's place on screen moves whenever anything above it moves, such
+  // as the bar shifting it over when a neighbouring widget changes width. So
+  // every ancestor is watched, and the wave snaps again on the next frame.
+  // Qt.callLater folds a burst of moves into one snap.
+  property var watchedAncestors: []
+
+  function watchAncestors() {
+    unwatchAncestors()
+    var watched = []
+    for (var item = root.parent; item; item = item.parent) {
+      item.xChanged.connect(scheduleSnap)
+      item.yChanged.connect(scheduleSnap)
+      item.scaleChanged.connect(scheduleSnap)
+      item.parentChanged.connect(watchAncestors)
+      watched.push(item)
+    }
+    watchedAncestors = watched
+    scheduleSnap()
+  }
+
+  function unwatchAncestors() {
+    for (var i = 0; i < watchedAncestors.length; i++) {
+      var item = watchedAncestors[i]
+      if (!item) continue
+      // An ancestor can be gone already when the bar is torn down.
+      try {
+        item.xChanged.disconnect(scheduleSnap)
+        item.yChanged.disconnect(scheduleSnap)
+        item.scaleChanged.disconnect(scheduleSnap)
+        item.parentChanged.disconnect(watchAncestors)
+      } catch (error) {}
+    }
+    watchedAncestors = []
+  }
+
+  Component.onCompleted: watchAncestors()
+  Component.onDestruction: unwatchAncestors()
+  onParentChanged: watchAncestors()
+  onXChanged: scheduleSnap()
+  onYChanged: scheduleSnap()
   onVisibleChanged: Qt.callLater(snapToPixels)
   onWidthChanged: Qt.callLater(snapToPixels)
   onHeightChanged: Qt.callLater(snapToPixels)

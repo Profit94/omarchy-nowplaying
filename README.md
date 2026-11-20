@@ -35,7 +35,7 @@ This removes the plugin and its bar placement. Your other Omarchy settings are l
 omarchy plugin update softwave.nowplaying
 ```
 
-If the bar icon doesn't change after updating, run `omarchy restart shell`. The current version is [v1.1.0](https://github.com/Profit94/omarchy-nowplaying/releases/tag/v1.1.0).
+If the bar icon doesn't change after updating, run `omarchy restart shell`. The current version is [v1.1.1](https://github.com/Profit94/omarchy-nowplaying/releases/tag/v1.1.1).
 
 ## Controls
 
@@ -76,6 +76,10 @@ Set these with `omarchy bar set softwave.nowplaying <key> <value>`.
 - On one tested setup, Spotify's GPU helper crashed under XWayland. Adding `--ozone-platform=wayland` to `~/.config/spotify-flags.conf` stopped it there.
 
 ## Changelog
+
+### [v1.1.1](https://github.com/Profit94/omarchy-nowplaying/releases/tag/v1.1.1)
+
+- The bar wave stays on whole screen pixels when the bar shifts it, such as when a neighbouring widget changes width. Before, it could sit a fraction of a pixel off until it next moved.
 
 ### [v1.1.0](https://github.com/Profit94/omarchy-nowplaying/releases/tag/v1.1.0)
 
