@@ -1,7 +1,7 @@
 # Now Playing for Omarchy
 
 <p align="center">
-  <img src="preview.png" alt="The Now Playing panel open under the Omarchy bar" width="489">
+  <img src="preview.png" alt="The Now Playing panel open under the Omarchy bar" width="458">
 </p>
 
 A minimal, music-only control for the Omarchy bar. A small sound wave moves while music plays and settles into a flat line when paused. It is drawn on whole pixels, so it stays as sharp as the icons beside it. The icon appears only while a music player has a track loaded.
@@ -83,7 +83,6 @@ Set these with `omarchy bar set softwave.nowplaying <key> <value>`.
 - Two wave rings replace the five level bars in the panel. They ripple with the real output level and settle into a still circle when paused.
 - The glow behind the cover is a little stronger and more colourful.
 - The play, previous and next buttons now sit evenly between the timeline and the divider below.
-- Bar and panel screenshots still show the previous design.
 
 ### [v1.0.2](https://github.com/Profit94/omarchy-nowplaying/releases/tag/v1.0.2)
 
