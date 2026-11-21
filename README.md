@@ -77,6 +77,10 @@ Set these with `omarchy bar set softwave.nowplaying <key> <value>`.
 
 ## Changelog
 
+### [v1.1.2](https://github.com/Profit94/omarchy-nowplaying/releases/tag/v1.1.2)
+
+- The bar wave no longer blobs at its peaks. It is now a single plain wave with a lower swing, so the two sides of each peak stay apart and the slopes look cleaner while it plays.
+
 ### [v1.1.1](https://github.com/Profit94/omarchy-nowplaying/releases/tag/v1.1.1)
 
 - The bar wave stays on whole screen pixels when the bar shifts it, such as when a neighbouring widget changes width. Before, it could sit a fraction of a pixel off until it next moved.

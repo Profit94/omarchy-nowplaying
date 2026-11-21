@@ -71,6 +71,15 @@ for (const px of [12, 15, 18, 20, 24, 30, 36]) {
   }
 }
 assert.ok(ys(m.wavePath(g15, 0, 1.2, 1)).every((y) => y === 8), "paused wave is flat")
+// Steep slopes made the two sides of a peak run together into a blob at
+// icon size. Keep the swing to 4 px and the slope gentle at every phase.
+for (let phase = 0; phase < 6.3; phase += 0.05) {
+  const n = nums(m.wavePath(g15, 1, phase, 1))
+  for (let i = 2; i < n.length; i += 2) {
+    assert.ok(Math.abs(n[i + 1] - g15.middle) <= 4 + 1e-9, "15 px wave swings at most 4 px at phase " + phase)
+    assert.ok(Math.abs((n[i + 1] - n[i - 1]) / (n[i] - n[i - 2])) <= 2.5, "15 px wave slope stays gentle at phase " + phase)
+  }
+}
 assert.notStrictEqual(m.wavePath(g15, 1, 0, 1), m.wavePath(g15, 1, 1, 1), "phase moves the wave")
 assert.ok(ys(m.wavePath(g15, 0, 0, 0.8)).every((y) => y === 6.4), "unit scales device pixels to item units")
 assert.ok(Math.abs(m.pixelSnap(10, 1.25) - 0.4) < 1e-9, "12.5 device px shifts half a pixel to 13")

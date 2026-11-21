@@ -235,20 +235,25 @@ function pixelSnap(position, pixelRatio) {
   return (Math.round(device) - device) / ratio
 }
 
-// The wave as an SVG path, in device pixels multiplied by `unit`. A second,
-// faster ripple keeps it from reading as a plain sine, and the envelope pins
-// both ends to the centre line. Peak height stays inside the box at every phase.
+// How much of the box's half-height the bar wave swings through. At the bar's
+// usual 15 device pixels that is 4 of the 6 available: any taller and the
+// slopes get so steep that the two sides of a peak run together into a blob.
+var WAVE_SWING = 2 / 3
+
+// The wave as an SVG path, in device pixels multiplied by `unit`. It is a
+// single plain sine: a second, faster ripple made peaks narrower than the
+// stroke at icon size. The envelope pins both ends to the centre line, and
+// peak height stays inside the box at every phase.
 function wavePath(grid, amplitude, phase, unit) {
   var points = 24
   var scale = unit || 1
   var width = grid.size - grid.inset * 2
-  var reach = grid.reach * clampFraction(amplitude)
+  var reach = grid.reach * WAVE_SWING * clampFraction(amplitude)
   var path = ""
   for (var i = 0; i <= points; i++) {
     var t = i / points
     var envelope = Math.sin(Math.PI * t)
-    var wave = 0.85 * Math.sin(2 * Math.PI * 1.25 * t - phase)
-      + 0.15 * Math.sin(2 * Math.PI * 2.5 * t - phase * 2)
+    var wave = Math.sin(2 * Math.PI * 1.25 * t - phase)
     var x = (grid.inset + width * t) * scale
     var y = (grid.middle + reach * envelope * wave) * scale
     path += (i === 0 ? "M" : "L") + x.toFixed(3) + " " + y.toFixed(3) + " "
